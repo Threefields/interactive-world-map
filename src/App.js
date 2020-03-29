@@ -1,12 +1,17 @@
 import React from 'react'
 import moment from 'moment'
+import { makeStyles } from '@material-ui/core/styles'
+import { AppBar, NarrativeDrawer, ThemeWrapper } from './components'
 import 'leaflet/dist/leaflet.css'
+
+import 'typeface-roboto'
 
 import L from 'leaflet'
 import { Map as LeafletMap, TileLayer } from 'react-leaflet'
 import Timeline from 'react-calendar-timeline'
 import 'react-calendar-timeline/lib/Timeline.css'
 
+import { data } from './data'
 
 // FIX leaflet's default icon path problems with webpack
 delete L.Icon.Default.prototype._getIconUrl
@@ -16,85 +21,58 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 })
 
-const styles = {
-  mapContainer: {
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
     height: '100%',
-    width: '100%',
-    zIndex: '1',
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+  },
+  appBarSpacer: theme.mixins.toolbar,
+  content: {
+    display: 'flex',
+    flex: '1 1',
+    flexFlow: 'column',
+    overflow: 'auto',
+  },
+  mapContainer: {
+    flex: 1,
   },
   timelineContainer: {
-    position: 'absolute',
-    width: '100%',
-    bottom: 0,
-    zIndex: '2',
+    flex: 1,
     background: '#fff',
-  }
-}
+  },
+}))
 
-const groups = [{ id: 1, title: 'group 1' }, { id: 2, title: 'group 2' }, { id: 3, title: 'group 3' }, { id: 4, title: 'group 4' }]
+const App = () => {
+  const classes = useStyles()
 
-const items = [
-  {
-    id: 1,
-    group: 1,
-    title: 'item 1',
-    start_time: moment(),
-    end_time: moment().add(1, 'hour'),
-    canMove: false,
-  },
-  {
-    id: 2,
-    group: 2,
-    title: 'item 2',
-    start_time: moment().add(-0.5, 'hour'),
-    end_time: moment().add(0.5, 'hour'),
-    canMove: false,
-  },
-  {
-    id: 3,
-    group: 1,
-    title: 'item 3',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
-    canMove: false,
-  },
-  {
-    id: 4,
-    group: 3,
-    title: 'item 4',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
-    canMove: false,
-  },
-  {
-    id: 5,
-    group: 4,
-    title: 'item 5',
-    start_time: moment().add(2, 'hour'),
-    end_time: moment().add(3, 'hour'),
-    canMove: false,
-  }
-]
-
-function App() {
   return (
-    <>
-      <LeafletMap center={[51.505, -0.09]} style={styles.mapContainer} minZoom={4} maxZoom={6} zoom={4} zoomControl={false}>
-        <TileLayer
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url='https://{s}.tile.osm.org/{z}/{x}/{y}.png'
-        />
-      </LeafletMap>
-      <div style={styles.timelineContainer}>
-        <Timeline
-          groups={groups}
-          items={items}
-          defaultTimeStart={moment().add(-12, 'hour')}
-          defaultTimeEnd={moment().add(12, 'hour')}
-        />
+    <ThemeWrapper>
+      <div className={classes.root}>
+        <AppBar />
+        <main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <LeafletMap center={[51.505, -0.09]} className={classes.mapContainer} minZoom={4} maxZoom={6} zoom={4} zoomControl={false}>
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            />
+          </LeafletMap>
+          <div classes={classes.timelineContainer}>
+            <Timeline
+              groups={data.groups}
+              items={data.items}
+              defaultTimeStart={moment().add(-12, 'hour')}
+              defaultTimeEnd={moment().add(12, 'hour')}
+            />
+          </div>
+        </main>
+        <NarrativeDrawer />
       </div>
-    </>
+    </ThemeWrapper>
   )
 }
 
-export default App;
+export default App
